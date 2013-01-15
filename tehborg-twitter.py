@@ -2,7 +2,6 @@
 
 import socket
 import tweepy
-import re
 
 # teh borg twitter auth
 consumer_key=""
@@ -20,10 +19,6 @@ network = 'irc.freenode.net'
 port = 6667
 channel = '#asciipr0n'
 nick = 'tbrg_'
-
-def trunc_at(s, d, n=3):
-    return d.join(s.split(d)[:n])
-
 
 irc = socket.socket ( socket.AF_INET, socket.SOCK_STREAM )
 irc.connect ( ( network, port ) )
