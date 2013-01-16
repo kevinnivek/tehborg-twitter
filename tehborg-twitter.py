@@ -32,11 +32,15 @@ while True:
    data = irc.recv ( 4096 )
    if data.find ( 'PING' ) != -1:
       irc.send ( 'PONG ' + data.split() [ 1 ] + '\r\n' )
-   if data.find ( '!tb_ quit' ) != -1:
-      irc.send ( 'QUIT\r\n' )
+#   if data.find ( '!tb_ quit' ) != -1:
+#      irc.send ( 'QUIT\r\n' )
    if data.find ( 'KICK' ) != -1:
       irc.send ( 'JOIN ' + channel + '\r\n' )
    if data.find ( 'teh-borg!~borg@asciipr0n.com PRIVMSG' ) != -1:
       data = data.partition(' :')
-      api.update_status(data[2])
+      tweet = data[2]
+      try:
+         api.update_status(tweet[:140])
+      except Exception, e:
+         print "Error.. continueing"
    print data
