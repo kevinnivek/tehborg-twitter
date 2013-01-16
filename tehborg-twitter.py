@@ -42,5 +42,5 @@ while True:
       try:
          api.update_status(tweet[:140])
       except Exception, e:
-         print "Error.. continueing"
+         print "Error.. continuing"
    print data
