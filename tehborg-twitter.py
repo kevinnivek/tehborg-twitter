@@ -72,7 +72,6 @@ while connected:
         if (time.time() - last_ping) > threshold:
             break
         if data.find ( 'teh-borg!~borg@asciipr0n.com PRIVMSG' ) != -1:
-        #if data.find ( 'crushkill!~crushkill@never.enough.unixsluts.com PRIVMSG' ) != -1:
             data = data.partition(' :')
             tweet = data[2]
             try:
