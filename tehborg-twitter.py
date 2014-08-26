@@ -86,4 +86,3 @@ while connected:
             break
 print "out of loop"
 connection(host, port, nick, ident, realname, chan)
-
