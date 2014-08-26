@@ -2,30 +2,43 @@
 
 import socket
 import tweepy
-import sys
-import string
-import os
-import platform
-import time
+import sys, string, os, platform, time
+import ConfigParser
 
-# teh borg twitter auth
-consumer_key=""
-consumer_secret=""
-access_token=""
-access_token_secret=""
+# Get config variables
+Config = ConfigParser.ConfigParser()
+Config.read(os.path.expanduser('~/.tehborg'))
+
+# Function to map configuration sections
+def ConfigSectionMap(section):
+    dict1 = {}
+    options = Config.options(section)
+    for option in options:
+        try:
+            dict1[option] = Config.get(section, option)
+            if dict1[option] == -1:
+                DebugPrint("skip: %s" % option)
+        except:
+            print("exception on %s!" % option)
+            dict1[option] = None
+    return dict1
+
+# Grab actual variables from config file
+consumer_key = ConfigSectionMap("twitter")['consumer_key']
+consumer_secret = ConfigSectionMap("twitter")['consumer_secret']
+access_token = ConfigSectionMap("twitter")['access_token']
+access_token_secret = ConfigSectionMap("twitter")['access_token_secret']
+host = ConfigSectionMap("irc")['host']
+port = ConfigSectionMap("irc")['port']
+chan = '#' + ConfigSectionMap("irc")['chan']
+nick = ConfigSectionMap("irc")['nick']
+ident = ConfigSectionMap("irc")['ident']
+realname = ConfigSectionMap("irc")['realname']
 
 # authenticate
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth)
-
-# irc details
-host = 'irc.freenode.net'
-port = 6667
-chan = '#asciipr0n'
-nick = 'tbrg_'
-ident = 'tbrg_'
-realname = 'tbrg_'
 
 # irc connection
 irc = socket.socket()
