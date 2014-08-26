@@ -84,6 +84,6 @@ while connected:
             connected = False
             print connected
             break
-print "Out of loop"
+print "out of loop"
 connection(host, port, nick, ident, realname, chan)
 
