@@ -54,15 +54,10 @@ def connection(host, port, nick, ident, realname, chan):
             irc.send("NICK %s\r\n" % nick)
             irc.send("USER %s %s bla :%s\r\n" % (ident, host, realname))
             irc.send("JOIN :%s\r\n" % chan)
-            # Initial msg to send when bot connects
-            irc.send("PRIVMSG %s :%s\r\n" % (chan, "TehBot: "+ nick + " Realname: " + realname + " ."))
-            print "setting connected to true for some reason"
             connected = True
-            datacheck = irc.recv ( 4096 )
-            print "datacheck : " + str(datacheck)
         except socket.error as e:
         #except Exception as e:
-            print "1Error : " + str(e)
+            print "Error : " + str(e)
             continue 
 
 # main definition + loop for scanning and tweeting
@@ -91,7 +86,7 @@ def main():
                 try:
                     api.update_status(tweet[:140])
                 except Exception, e:
-                    print "2Error: " + str(e) 
+                    print "Error: " + str(e) 
             print data
         except socket.timeout as e :
                 close()
@@ -107,7 +102,7 @@ def close():
         global connected
         connected = False
     except Exception, e:
-        print "3Error: " + str(e) 
+        print "Error: " + str(e) 
 
 # main calls
 connection(host, port, nick, ident, realname, chan)
