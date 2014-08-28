@@ -71,6 +71,8 @@ def main():
                 break
             if data.find ( "Nickname is already in use" ) != -1:
                 nick = nick + str(time.time())
+                close()
+                break
             if data.find ( 'KICK' ) != -1:
                 irc.send ( 'JOIN ' + chan + '\r\n' )
             # Ping Pong so we don't get disconnected
