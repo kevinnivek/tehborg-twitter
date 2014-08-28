@@ -2,7 +2,7 @@
 
 import socket
 import tweepy
-import sys, string, os, platform, time, errno
+import sys, string, os, platform, tim
 import ConfigParser
 
 # Get config variables
