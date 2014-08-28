@@ -76,10 +76,10 @@ def main():
             # Ping Pong so we don't get disconnected
             if data.find ( 'PING' ) != -1:
                 irc.send ( 'PONG ' + data.split() [ 1 ] + '\r\n' )
-            if data.find ( '!tb_quit' ) != -1:
-                irc.send ( 'QUIT\r\n' )
-                close()
-                break
+            #if data.find ( '!tb_quit' ) != -1:
+            #    irc.send ( 'QUIT\r\n' )
+            #    close()
+            #    break
             if data.find ( 'teh-borg!~borg@asciipr0n.com PRIVMSG' ) != -1:
                 data = data.partition(' :')
                 tweet = data[2]
