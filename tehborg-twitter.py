@@ -2,7 +2,7 @@
 
 import socket
 import tweepy
-import sys, string, os, platform, time
+import sys, string, os, platform, time, errno
 import ConfigParser
 
 # Get config variables
@@ -40,62 +40,75 @@ auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth)
 
-# irc connection
+# Our IRC connection
 irc = socket.socket()
 irc.settimeout(300)
 connected = False
 
-# Connection definition 
 def connection(host, port, nick, ident, realname, chan):
+    global connected
     while connected is False:
         try:
             irc.connect((host, port))
-            irc.send("nick %s\r\n" % nick)
-            #irc.send("USER %s %s bla :%s\r\n" % (ident, host, realname))
-            irc.send ( 'USER ' + nick + ' ' + nick + ' ' + nick + ' :' + nick + '\r\n' )
+            time.sleep(10)
+            irc.send("NICK %s\r\n" % nick)
+            irc.send("USER %s %s bla :%s\r\n" % (ident, host, realname))
             irc.send("JOIN :%s\r\n" % chan)
             # Initial msg to send when bot connects
-            #irc.send("PRIVMSG %s :%s\r\n" % (chan, "TehBot: "+ nick + " Realname: " + realname + " ."))
-            global connected
+            irc.send("PRIVMSG %s :%s\r\n" % (chan, "TehBot: "+ nick + " Realname: " + realname + " ."))
+            print "setting connected to true for some reason"
             connected = True
-        except socket.error:
-            print "Attempting to connect..."
-            time.sleep(5)
-            continue
-connection(host, port, nick, ident, realname, chan)
+            datacheck = irc.recv ( 4096 )
+            print "datacheck : " + str(datacheck)
+        except socket.error as e:
+        #except Exception as e:
+            print "1Error : " + str(e)
+            continue 
 
-# threshold and time for pong
-last_ping = time.time()
-threshold = 5 * 60 # five minutes, make this whatever you want
+# main definition + loop for scanning and tweeting
+def main():
+    global connected, host, port, nick, ident, realname, chan
+    while connected:
+        try:
+            data = irc.recv ( 4096 )
+            if len(data) == 0:
+                close()
+                break
+            if data.find ( "Nickname is already in use" ) != -1:
+                nick = nick + str(time.time())
+            if data.find ( 'KICK' ) != -1:
+                irc.send ( 'JOIN ' + chan + '\r\n' )
+            # Ping Pong so we don't get disconnected
+            if data.find ( 'PING' ) != -1:
+                irc.send ( 'PONG ' + data.split() [ 1 ] + '\r\n' )
+            if data.find ( '!tb_quit' ) != -1:
+                irc.send ( 'QUIT\r\n' )
+                close()
+                break
+            if data.find ( 'teh-borg!~borg@asciipr0n.com PRIVMSG' ) != -1:
+                data = data.partition(' :')
+                tweet = data[2]
+                try:
+                    api.update_status(tweet[:140])
+                except Exception, e:
+                    print "2Error: " + str(e) 
+            print data
+        except socket.timeout as e :
+                close()
+                break
+    connection(host, port, nick, ident, realname, chan)
+    main()
 
-# main loop for scanning and tweeting
-while connected:
+def close():
     try:
-        data = irc.recv ( 4096 )
-        if len(data) == 0:
-            break
-        if data.find ( "Nickname is already in use" ) != -1:
-            nick = nick + str(time.time())
-        if data.find ( 'KICK' ) != -1:
-            irc.send ( 'JOIN ' + chan + '\r\n' )
-        # Ping Pong so we don't get disconnected
-        if data.find ( 'PING' ) != -1:
-            irc.send ( 'PONG ' + data.split() [ 1 ] + '\r\n' )
-            last_ping = time.time()
-        if (time.time() - last_ping) > threshold:
-            break
-        if data.find ( 'teh-borg!~borg@asciipr0n.com PRIVMSG' ) != -1:
-            data = data.partition(' :')
-            tweet = data[2]
-            try:
-                api.update_status(tweet[:140])
-            except Exception, e:
-                print "Error.. continuing"
-        print data
-    except socket.timeout:
-            global connected
-            connected = False
-            print connected
-            break
-print "out of loop"
+        global irc
+        irc.shutdown(socket.SHUT_RDWR)
+        irc = socket.socket()
+        global connected
+        connected = False
+    except Exception, e:
+        print "3Error: " + str(e) 
+
+# main calls
 connection(host, port, nick, ident, realname, chan)
+main()
