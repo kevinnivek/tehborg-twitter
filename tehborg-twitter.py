@@ -4,6 +4,7 @@ import socket
 import tweepy
 import sys, string, os, platform, time, re
 import ConfigParser
+import random
 
 # Get config variables
 Config = ConfigParser.ConfigParser()
@@ -34,6 +35,7 @@ chan = '#' + ConfigSectionMap("irc")['chan']
 nick = ConfigSectionMap("irc")['nick']
 ident = ConfigSectionMap("irc")['ident']
 realname = ConfigSectionMap("irc")['realname']
+nicksearch = ConfigSectionMap("irc")['nicksearch']
 
 # authenticate
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
@@ -80,9 +82,11 @@ def main():
                 irc.send ( 'PONG ' + data.split()[1] + '\r\n' )
             if data.find ( '!tb_hi' ) != -1:
                 irc.send ( 'PRIVMSG %s : hey\r\n' % (chan) )
-            if re.search ( 'teh-borg!(.*) PRIVMSG', data ):
+            if re.search ( nicksearch + '!(.*) PRIVMSG', data ):
                 data = data.partition(' :')
-                tweet = data[2]
+                pretweet = data[2]
+                hashtag = random.choice(pretweet.split())
+                tweet = pretweet + ' #' + hashtag
                 try:
                     api.update_status(tweet[:140])
                 except Exception, e:
