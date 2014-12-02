@@ -11,3 +11,4 @@ chan: channel
 nick: nick
 ident: ident 
 realname: realname 
+nicksearch: nick-to-search
