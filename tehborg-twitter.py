@@ -86,7 +86,7 @@ def main():
                 data = data.partition(' :')
                 pretweet = data[2]
                 hashtag = random.choice(pretweet.split())
-                tweet = pretweet + ' #' + hashtag
+                tweet = pretweet + ' #' + hashtag + ' #tehborg'
                 try:
                     api.update_status(tweet[:140])
                 except Exception, e:
